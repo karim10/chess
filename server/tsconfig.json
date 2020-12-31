@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "module": "CommonJS",
+        "esModuleInterop": true,
+        "target": "es6",
+        "moduleResolution": "node",
+        "noUnusedLocals": false
+    },
+    "include": ["index.ts"]
+}
