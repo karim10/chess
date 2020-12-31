@@ -1,6 +1,11 @@
-import { Cell, Coordinates, BoardState, Piece, Color } from "./types";
+import { Cell, Coordinates, BoardState, Piece, Color } from './types';
 
-export function getPotentialMoves(activeCell: Cell, activeCellCoordinates: Coordinates, isFirstRound: boolean, boardState: BoardState): Coordinates[] {
+export function getPotentialMoves(
+    activeCell: Cell,
+    activeCellCoordinates: Coordinates,
+    isFirstRound: boolean,
+    boardState: BoardState
+): Coordinates[] {
     if (activeCell.empty) {
         return [];
     }
@@ -15,10 +20,10 @@ export function getPotentialMoves(activeCell: Cell, activeCellCoordinates: Coord
     }
 
     if (activeCell.piece === Piece.Knight) {
-        potentialMoves.push({ row: row - 2, column: column - 1 })
-        potentialMoves.push({ row: row - 2, column: column + 1 })
-        potentialMoves.push({ row: row + 2, column: column - 1 })
-        potentialMoves.push({ row: row + 2, column: column + 1 })
+        potentialMoves.push({ row: row - 2, column: column - 1 });
+        potentialMoves.push({ row: row - 2, column: column + 1 });
+        potentialMoves.push({ row: row + 2, column: column - 1 });
+        potentialMoves.push({ row: row + 2, column: column + 1 });
     }
 
     if (activeCell.piece === Piece.Pawn) {
@@ -37,7 +42,6 @@ export function getPotentialMoves(activeCell: Cell, activeCellCoordinates: Coord
             potentialMoves.push({ row: row + i, column: column - i });
             potentialMoves.push({ row: row - i, column: column + i });
             potentialMoves.push({ row: row - i, column: column - i });
-
         }
     }
 
@@ -60,9 +64,10 @@ export function getPotentialMoves(activeCell: Cell, activeCellCoordinates: Coord
             potentialMoves.push({ row: row - i, column });
             potentialMoves.push({ row, column: column + i });
             potentialMoves.push({ row, column: column - i });
-
         }
     }
 
-    return potentialMoves.filter(potentialMove => potentialMove.row > -1 && potentialMove.column > -1);
+    return potentialMoves.filter(
+        potentialMove => potentialMove.row > -1 && potentialMove.column > -1
+    );
 }

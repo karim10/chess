@@ -16,5 +16,5 @@ export function Home() {
         <div>
             <button onClick={createGame}> Create Game </button>
         </div>
-    )
+    );
 }
