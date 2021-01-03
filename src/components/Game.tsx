@@ -3,104 +3,123 @@ import { isEqual } from 'lodash';
 
 import { GameState, Cell, Coordinates, Color } from '../types';
 import { getPotentialMoves } from '../moves';
+import '../chess_icons/knight_black.svg';
 
 export function Game(props: GameState) {
-    const { boardState, activeCoordinates, turn, isFirstRound } = props;
-    const [activeCellCoordinates, setActiveCellCoordinates] = useState<
-        Coordinates | undefined
-    >(activeCoordinates);
+    const [gameState, setGameState] = React.useState<GameState>(props);
     const [potentialMoves, setPotentialMoves] = useState<Coordinates[]>([]);
     const color = window.sessionStorage.getItem('color') as Color;
+    let baseColor = Color.white;
 
     useEffect(() => {
-        if (!activeCellCoordinates) {
+        if (!gameState.activeCoordinates) {
             setPotentialMoves([]);
             return;
         }
 
-        const activeCell =
-            boardState[activeCellCoordinates.row][activeCellCoordinates.column];
-        setPotentialMoves(
-            getPotentialMoves(
-                activeCell,
-                activeCellCoordinates,
-                isFirstRound,
-                boardState
-            )
-        );
-    }, [activeCellCoordinates, boardState, isFirstRound]);
+        setPotentialMoves(getPotentialMoves(gameState));
+    }, [gameState.activeCoordinates]);
 
     return (
-        <div style={boardStyles}>
-            {boardState.map((r, i) =>
-                r.map((c, j) => (
-                    <CellComponentMemo
-                        cell={c}
-                        key={i.toString().concat(j.toString())}
-                        coordinates={{ row: i, column: j }}
-                        setActiveCellCoordinates={setActiveCellCoordinates}
-                        activeCellCoordinates={activeCellCoordinates}
-                        potentialMoves={potentialMoves}
-                        color={color}
-                        turn={turn}
-                    />
-                ))
-            )}
+        <div>
+            Turn: {gameState.turn};
+            <div style={boardStyles}>
+                {gameState.boardState.map((r, i) => {
+                    baseColor = baseColor === Color.white ? Color.black : Color.white;
+                    return r.map((c, j) => {
+                        baseColor = baseColor === Color.white ? Color.black : Color.white;
+                        return (
+                            <CellComponentMemo
+                                key={i.toString().concat(j.toString())}
+                                cell={c}
+                                coordinates={{ row: i, column: j }}
+                                potentialMoves={potentialMoves}
+                                color={color}
+                                gameState={gameState}
+                                setGameState={setGameState}
+                                baseColor={baseColor}
+                            />
+                        );
+                    });
+                })}
+            </div>
         </div>
     );
 }
-
 interface CellComponentProps {
     cell: Cell;
     coordinates: Coordinates;
-    setActiveCellCoordinates: React.Dispatch<
-        React.SetStateAction<Coordinates | undefined>
-    >;
-    activeCellCoordinates?: Coordinates;
     potentialMoves: Coordinates[];
     color: Color;
-    turn: Color;
+    gameState: GameState;
+    setGameState: React.Dispatch<React.SetStateAction<GameState>>;
+    baseColor: Color;
 }
 
-const CellComponentMemo = React.memo(function CellComponent(
-    props: CellComponentProps
-) {
-    const {
-        cell,
-        coordinates,
-        setActiveCellCoordinates,
-        activeCellCoordinates,
-        potentialMoves,
-        color,
-        turn,
-    } = props;
-    const isActiveCell = isEqual(activeCellCoordinates, coordinates);
-    const isPotentialMove =
-        potentialMoves.find(potentialMove =>
-            isEqual(potentialMove, coordinates)
-        ) !== undefined;
+const CellComponentMemo = React.memo(function CellComponent(props: CellComponentProps) {
+    const { cell, coordinates, potentialMoves, color, setGameState, gameState, baseColor } = props;
 
-    const setActiveCellCoordinatesHandler = () => {
-        if (turn !== color || cell.empty) {
+    const { activeCoordinates } = gameState;
+    const isActiveCell = isEqual(activeCoordinates, coordinates);
+    const isPotentialMove = potentialMoves.find(potentialMove => isEqual(potentialMove, coordinates)) !== undefined;
+
+    // BIG REFACTORING
+    const onCellClickHandler = () => {
+        const newGameState = { ...gameState };
+        if (!cell.empty && cell.color !== gameState.turn) {
             return;
         }
 
-        if (cell.empty || cell.color !== color || isActiveCell) {
-            setActiveCellCoordinates(undefined);
-        } else {
-            setActiveCellCoordinates(coordinates);
+        if (activeCoordinates && isPotentialMove) {
+            if (!cell.empty && cell.color === color) {
+                newGameState.activeCoordinates = undefined;
+                setGameState(newGameState);
+                return;
+            }
+
+            // move piece
+            newGameState.boardState[coordinates.row][coordinates.column] =
+                newGameState.boardState[activeCoordinates.row][activeCoordinates.column];
+            newGameState.boardState[activeCoordinates.row][activeCoordinates.column] = { empty: true };
+
+            newGameState.turn = gameState.turn === Color.black ? Color.white : Color.black;
+
+            if (!cell.empty) {
+                newGameState.eatenPieces.push(newGameState.boardState[coordinates.row][coordinates.column]);
+            }
+
+            newGameState.activeCoordinates = undefined;
+            setGameState(newGameState);
+            return;
         }
+
+        if (cell.empty || /* cell.color !== color || */ isActiveCell) {
+            newGameState.activeCoordinates = undefined;
+        } else {
+            newGameState.activeCoordinates = coordinates;
+        }
+
+        setGameState(newGameState);
     };
 
     return (
-        <div
-            style={getCellStyles(isActiveCell, isPotentialMove)}
-            onClick={setActiveCellCoordinatesHandler}
-        >
-            {cell.empty ? '' : cell.piece + ' and color ' + cell.color}
+        <div style={getCellStyles(isActiveCell, baseColor)} onClick={onCellClickHandler}>
+            {isPotentialMove ? <div style={dotStyles} /> : null}
+            {!cell.empty ? (
+                <img src={`../chess_icons/${cell.piece}_${cell.color}.svg`} alt={`${cell.piece}_${cell.color}`} />
+            ) : null}
         </div>
     );
 });
+
+const dotStyles: React.CSSProperties = {
+    height: '25px',
+    width: '25px',
+    backgroundColor: '#bbb',
+    borderRadius: '50%',
+    display: 'inline-block',
+    position: 'absolute',
+};
 
 const boardStyles: React.CSSProperties = {
     height: '600px',
@@ -111,13 +130,13 @@ const boardStyles: React.CSSProperties = {
     flexWrap: 'wrap',
 };
 
-const getCellStyles = (
-    isActiveCell: boolean,
-    isPotentialMove: boolean
-): React.CSSProperties => ({
+const getCellStyles = (isActiveCell: boolean, baseColor: Color): React.CSSProperties => ({
     width: '70px',
     height: '70px',
     border: 'solid 1px',
     cursor: 'pointer',
-    backgroundColor: isActiveCell ? 'red' : isPotentialMove ? 'blue' : 'white',
+    backgroundColor: isActiveCell ? '#EDFF6B' : baseColor === Color.black ? '#65A259' : '#EBF4D2',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
 });

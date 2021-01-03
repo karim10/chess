@@ -30,9 +30,7 @@ function GameWrapper() {
 
     React.useEffect(() => {
         const fetchGameState = async () => {
-            const response = await fetch(
-                `http://localhost:8000/get-game-state/${gameId}`
-            );
+            const response = await fetch(`http://localhost:8000/get-game-state/${gameId}`);
             const body = await response.json();
             const color = window.sessionStorage.getItem('color');
             if (!color) {
@@ -43,9 +41,7 @@ function GameWrapper() {
         fetchGameState();
     }, [gameId]);
 
-    return (
-        <div>{gameState ? <Game {...gameState} /> : <LoadingSpinner />}</div>
-    );
+    return <div>{gameState ? <Game {...gameState} /> : <LoadingSpinner />}</div>;
 }
 
 function LoadingSpinner() {

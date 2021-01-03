@@ -1,9 +1,10 @@
 export interface GameState {
-    gameId: string;
-    turn: Color;
-    boardState: BoardState;
-    activeCoordinates?: Coordinates;
-    isFirstRound: boolean;
+    readonly gameId: string;
+    readonly turn: Color;
+    readonly boardState: BoardState;
+    readonly activeCoordinates?: Coordinates;
+    readonly isFirstRound: boolean;
+    readonly eatenPieces: Cell[];
 }
 
 export enum Color {
@@ -12,12 +13,12 @@ export enum Color {
 }
 
 export enum Piece {
-    King,
-    Rook,
-    Bishop,
-    Queen,
-    Knight,
-    Pawn,
+    King = 'king',
+    Rook = 'rook',
+    Bishop = 'bishop',
+    Queen = 'queen',
+    Knight = 'knight',
+    Pawn = 'pawn',
 }
 
 const emptyRow: Row = [
@@ -56,10 +57,10 @@ export const initialBoardState: BoardState = [
         { piece: Piece.Pawn, color: Color.black, empty: false },
         { piece: Piece.Pawn, color: Color.black, empty: false },
     ],
-    emptyRow,
-    emptyRow,
-    emptyRow,
-    emptyRow,
+    [...emptyRow],
+    [...emptyRow],
+    [...emptyRow],
+    [...emptyRow],
     [
         { piece: Piece.Pawn, color: Color.white, empty: false },
         { piece: Piece.Pawn, color: Color.white, empty: false },
@@ -87,6 +88,7 @@ export const initialGameState: GameState = {
     boardState: initialBoardState,
     turn: Color.white,
     isFirstRound: true,
+    eatenPieces: [],
 };
 
 export interface Coordinates {

@@ -1,73 +1,124 @@
-import { Cell, Coordinates, BoardState, Piece, Color } from './types';
+import { Coordinates, Piece, Color, GameState } from './types';
 
-export function getPotentialMoves(
-    activeCell: Cell,
-    activeCellCoordinates: Coordinates,
-    isFirstRound: boolean,
-    boardState: BoardState
-): Coordinates[] {
-    if (activeCell.empty) {
+export function getPotentialMoves(gameState: GameState): Coordinates[] {
+    if (!gameState.activeCoordinates) {
         return [];
     }
 
-    const { row, column } = activeCellCoordinates;
-    const potentialMoves: Coordinates[] = [];
-    if (activeCell.piece === Piece.King) {
-        potentialMoves.push({ row: row - 1, column });
-        potentialMoves.push({ row: row + 1, column });
-        potentialMoves.push({ row, column: column + 1 });
-        potentialMoves.push({ row, column: column - 1 });
+    const { row, column } = gameState.activeCoordinates;
+
+    const cell = gameState.boardState[row][column];
+    if (cell.empty) {
+        return [];
     }
 
-    if (activeCell.piece === Piece.Knight) {
+    const potentialMovesByAxis = getAxis(row, column, gameState);
+
+    if (cell.piece === Piece.Queen) {
+        return potentialMovesByAxis.diagonal.concat(potentialMovesByAxis.orthogonal);
+    }
+
+    if (cell.piece === Piece.Bishop) {
+        return potentialMovesByAxis.diagonal;
+    }
+
+    if (cell.piece === Piece.Rook) {
+        return potentialMovesByAxis.orthogonal;
+    }
+
+    if (cell.piece === Piece.King) {
+        return potentialMovesByAxis.diagonal_1.concat(potentialMovesByAxis.orthogonal_1);
+    }
+
+    const potentialMoves = [];
+    if (cell.piece === Piece.Pawn) {
+        const pawnMove = row === 1 || row === 6 ? 2 : 1;
+        if (cell.color === Color.black) {
+            potentialMoves.push({ row: row + pawnMove, column: column });
+        }
+
+        if (cell.color === Color.white) {
+            potentialMoves.push({ row: row - pawnMove, column: column });
+        }
+    }
+
+    if (cell.piece === Piece.Knight) {
         potentialMoves.push({ row: row - 2, column: column - 1 });
         potentialMoves.push({ row: row - 2, column: column + 1 });
         potentialMoves.push({ row: row + 2, column: column - 1 });
         potentialMoves.push({ row: row + 2, column: column + 1 });
     }
 
-    if (activeCell.piece === Piece.Pawn) {
-        if (activeCell.color === Color.black) {
-            potentialMoves.push({ row: row + 1, column: column });
-        }
+    return potentialMoves;
+}
 
-        if (activeCell.color === Color.white) {
-            potentialMoves.push({ row: row - 1, column: column });
-        }
+function getAxis(
+    row: number,
+    colunm: number,
+    gameState: GameState
+): {
+    diagonal: Coordinates[];
+    orthogonal: Coordinates[];
+    diagonal_1: Coordinates[];
+    orthogonal_1: Coordinates[];
+} {
+    const up_left = new Axis(gameState);
+    const up_right = new Axis(gameState);
+    const bottom_right = new Axis(gameState);
+    const bottom_left = new Axis(gameState);
+    const left = new Axis(gameState);
+    const up = new Axis(gameState);
+    const right = new Axis(gameState);
+    const bottom = new Axis(gameState);
+
+    for (let i = 1; i < 8; i++) {
+        up_left.push_cell(row - i, colunm - i);
+        up_right.push_cell(row - i, colunm + i);
+        bottom_right.push_cell(row + i, colunm + i);
+        bottom_left.push_cell(row + i, colunm - i);
+        left.push_cell(row, colunm - i);
+        up.push_cell(row - i, colunm);
+        right.push_cell(row, colunm + i);
+        bottom.push_cell(row + i, colunm);
     }
 
-    if (activeCell.piece === Piece.Bishop) {
-        for (let i = 0; i < 8; i++) {
-            potentialMoves.push({ row: row + i, column: column + i });
-            potentialMoves.push({ row: row + i, column: column - i });
-            potentialMoves.push({ row: row - i, column: column + i });
-            potentialMoves.push({ row: row - i, column: column - i });
-        }
-    }
+    return {
+        diagonal: [...up_left.concat(up_right).concat(bottom_left).concat(bottom_right)],
+        orthogonal: [...left.concat(up).concat(right).concat(bottom)],
+        diagonal_1: [up_left[0], up_right[0], bottom_left[0], bottom_right[0]],
+        orthogonal_1: [left[0], up[0], right[0], bottom[0]],
+    };
+}
 
-    if (activeCell.piece === Piece.Rook) {
-        for (let i = 0; i < 8; i++) {
-            potentialMoves.push({ row: row + i, column });
-            potentialMoves.push({ row: row - i, column });
-            potentialMoves.push({ row, column: column + i });
-            potentialMoves.push({ row, column: column - i });
-        }
-    }
+class Axis extends Array<Coordinates> {
+    private gameState: GameState;
+    private blocked: boolean;
 
-    if (activeCell.piece === Piece.Queen) {
-        for (let i = 0; i < 8; i++) {
-            potentialMoves.push({ row: row + i, column: column + i });
-            potentialMoves.push({ row: row + i, column: column - i });
-            potentialMoves.push({ row: row - i, column: column + i });
-            potentialMoves.push({ row: row - i, column: column - i });
-            potentialMoves.push({ row: row + i, column });
-            potentialMoves.push({ row: row - i, column });
-            potentialMoves.push({ row, column: column + i });
-            potentialMoves.push({ row, column: column - i });
-        }
+    constructor(gameState: GameState) {
+        super();
+        this.gameState = gameState;
+        this.blocked = false;
     }
+    public push_cell(row: number, column: number) {
+        if (row < 0 || row > 7 || column < 0 || column > 7) {
+            return;
+        }
 
-    return potentialMoves.filter(
-        potentialMove => potentialMove.row > -1 && potentialMove.column > -1
-    );
+        if (this.blocked) {
+            return;
+        }
+
+        const cell = this.gameState.boardState[row][column];
+        if (!cell.empty) {
+            this.blocked = true;
+
+            if (cell.color === this.gameState.turn) {
+                return;
+            }
+
+            this.push({ row, column });
+        }
+
+        this.push({ row, column });
+    }
 }
