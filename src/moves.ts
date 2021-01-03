@@ -32,13 +32,43 @@ export function getPotentialMoves(gameState: GameState): Coordinates[] {
 
     const potentialMoves = [];
     if (cell.piece === Piece.Pawn) {
-        const pawnMove = row === 1 || row === 6 ? 2 : 1;
+        const firstPawnMove = row === 1 || row === 6 ? true : false;
         if (cell.color === Color.black) {
-            potentialMoves.push({ row: row + pawnMove, column: column });
+            potentialMoves.push({ row: row + 1, column: column });
+            if (firstPawnMove) {
+                potentialMoves.push({ row: row + 2, column: column });
+            }
         }
 
         if (cell.color === Color.white) {
-            potentialMoves.push({ row: row - pawnMove, column: column });
+            potentialMoves.push({ row: row - 1, column: column });
+            if (firstPawnMove) {
+                potentialMoves.push({ row: row - 2, column: column });
+            }
+        }
+
+        const blackPawnDigonalLeft =
+            potentialMovesByAxis.diagonal_1[2] && gameState.boardState[potentialMovesByAxis.diagonal_1[2].row][potentialMovesByAxis.diagonal_1[2].column];
+        const blackPawnDigonalRight =
+            potentialMovesByAxis.diagonal_1[3] && gameState.boardState[potentialMovesByAxis.diagonal_1[3].row][potentialMovesByAxis.diagonal_1[3].column];
+        const whitePawnDigonalLeft =
+            potentialMovesByAxis.diagonal_1[0] && gameState.boardState[potentialMovesByAxis.diagonal_1[0].row][potentialMovesByAxis.diagonal_1[0].column];
+        const whitePawnDigonalRight =
+            potentialMovesByAxis.diagonal_1[1] && gameState.boardState[potentialMovesByAxis.diagonal_1[1].row][potentialMovesByAxis.diagonal_1[1].column];
+        if (blackPawnDigonalLeft && !blackPawnDigonalLeft.empty) {
+            potentialMoves.push(potentialMovesByAxis.diagonal_1[2]);
+        }
+
+        if (blackPawnDigonalRight && !blackPawnDigonalRight.empty) {
+            potentialMoves.push(potentialMovesByAxis.diagonal_1[3]);
+        }
+
+        if (whitePawnDigonalLeft && !whitePawnDigonalLeft.empty) {
+            potentialMoves.push(potentialMovesByAxis.diagonal_1[0]);
+        }
+
+        if (whitePawnDigonalRight && !whitePawnDigonalRight.empty) {
+            potentialMoves.push(potentialMovesByAxis.diagonal_1[1]);
         }
     }
 
