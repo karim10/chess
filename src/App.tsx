@@ -6,20 +6,20 @@ import { BrowserRouter, Route, Switch, useParams } from 'react-router-dom';
 import { Home } from './components/Home';
 
 function App() {
-    window.sessionStorage.setItem('color', 'white');
+    window.sessionStorage.setItem('color', '');
     return (
         <div style={appStyles}>
-            {/* <BrowserRouter>
-          <Switch>
-            <Route path="/game/:gameId">
-              <GameWrapper />
-            </Route>
-            <Route path="/">
-              <Home />
-            </Route>
-          </Switch>
-        </BrowserRouter> */}
-            <Game {...initialGameState} />
+            <BrowserRouter>
+                <Switch>
+                    <Route path="/game/:gameId">
+                        <GameWrapper />
+                    </Route>
+                    <Route path="/">
+                        <Home />
+                    </Route>
+                </Switch>
+            </BrowserRouter>
+            {/* <Game {...initialGameState} /> */}
         </div>
     );
 }
@@ -33,6 +33,7 @@ function GameWrapper() {
             const response = await fetch(`http://localhost:8000/get-game-state/${gameId}`);
             const body = await response.json();
             const color = window.sessionStorage.getItem('color');
+
             if (!color) {
                 window.sessionStorage.setItem('color', 'black');
             }

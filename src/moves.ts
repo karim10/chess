@@ -38,6 +38,19 @@ export function getPotentialMoves(gameState: GameState): Coordinates[] {
             if (firstPawnMove) {
                 potentialMoves.push({ row: row + 2, column: column });
             }
+
+            // black pawn attacking diagonal
+            const blackPawnDigonalLeft =
+                potentialMovesByAxis.diagonal_1[2] && gameState.boardState[potentialMovesByAxis.diagonal_1[2].row][potentialMovesByAxis.diagonal_1[2].column];
+            const blackPawnDigonalRight =
+                potentialMovesByAxis.diagonal_1[3] && gameState.boardState[potentialMovesByAxis.diagonal_1[3].row][potentialMovesByAxis.diagonal_1[3].column];
+            if (blackPawnDigonalLeft && !blackPawnDigonalLeft.empty && blackPawnDigonalLeft.color === Color.white) {
+                potentialMoves.push(potentialMovesByAxis.diagonal_1[2]);
+            }
+
+            if (blackPawnDigonalRight && !blackPawnDigonalRight.empty) {
+                potentialMoves.push(potentialMovesByAxis.diagonal_1[3]);
+            }
         }
 
         if (cell.color === Color.white) {
@@ -45,30 +58,19 @@ export function getPotentialMoves(gameState: GameState): Coordinates[] {
             if (firstPawnMove) {
                 potentialMoves.push({ row: row - 2, column: column });
             }
-        }
 
-        const blackPawnDigonalLeft =
-            potentialMovesByAxis.diagonal_1[2] && gameState.boardState[potentialMovesByAxis.diagonal_1[2].row][potentialMovesByAxis.diagonal_1[2].column];
-        const blackPawnDigonalRight =
-            potentialMovesByAxis.diagonal_1[3] && gameState.boardState[potentialMovesByAxis.diagonal_1[3].row][potentialMovesByAxis.diagonal_1[3].column];
-        const whitePawnDigonalLeft =
-            potentialMovesByAxis.diagonal_1[0] && gameState.boardState[potentialMovesByAxis.diagonal_1[0].row][potentialMovesByAxis.diagonal_1[0].column];
-        const whitePawnDigonalRight =
-            potentialMovesByAxis.diagonal_1[1] && gameState.boardState[potentialMovesByAxis.diagonal_1[1].row][potentialMovesByAxis.diagonal_1[1].column];
-        if (blackPawnDigonalLeft && !blackPawnDigonalLeft.empty) {
-            potentialMoves.push(potentialMovesByAxis.diagonal_1[2]);
-        }
+            // white pawn attacking diagonal
+            const whitePawnDigonalLeft =
+                potentialMovesByAxis.diagonal_1[0] && gameState.boardState[potentialMovesByAxis.diagonal_1[0].row][potentialMovesByAxis.diagonal_1[0].column];
+            const whitePawnDigonalRight =
+                potentialMovesByAxis.diagonal_1[1] && gameState.boardState[potentialMovesByAxis.diagonal_1[1].row][potentialMovesByAxis.diagonal_1[1].column];
+            if (whitePawnDigonalLeft && !whitePawnDigonalLeft.empty) {
+                potentialMoves.push(potentialMovesByAxis.diagonal_1[0]);
+            }
 
-        if (blackPawnDigonalRight && !blackPawnDigonalRight.empty) {
-            potentialMoves.push(potentialMovesByAxis.diagonal_1[3]);
-        }
-
-        if (whitePawnDigonalLeft && !whitePawnDigonalLeft.empty) {
-            potentialMoves.push(potentialMovesByAxis.diagonal_1[0]);
-        }
-
-        if (whitePawnDigonalRight && !whitePawnDigonalRight.empty) {
-            potentialMoves.push(potentialMovesByAxis.diagonal_1[1]);
+            if (whitePawnDigonalRight && !whitePawnDigonalRight.empty) {
+                potentialMoves.push(potentialMovesByAxis.diagonal_1[1]);
+            }
         }
     }
 
@@ -123,11 +125,13 @@ function getAxis(
 class Axis extends Array<Coordinates> {
     private gameState: GameState;
     private blocked: boolean;
+    private color: Color;
 
     constructor(gameState: GameState) {
         super();
         this.gameState = gameState;
         this.blocked = false;
+        this.color = window.sessionStorage.getItem('color') as Color;
     }
     public push_cell(row: number, column: number) {
         if (row < 0 || row > 7 || column < 0 || column > 7) {
@@ -142,7 +146,7 @@ class Axis extends Array<Coordinates> {
         if (!cell.empty) {
             this.blocked = true;
 
-            if (cell.color === this.gameState.turn) {
+            if (cell.color === this.color) {
                 return;
             }
 

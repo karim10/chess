@@ -1,5 +1,6 @@
 import React, { CSSProperties, useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
+import io from 'socket.io-client';
 
 import { GameState, Cell, Coordinates, Color, Piece } from '../types';
 import { getPotentialMoves } from '../moves';
@@ -9,6 +10,7 @@ export function Game(props: GameState) {
     const [gameState, setGameState] = React.useState<GameState>(props);
     const [potentialMoves, setPotentialMoves] = useState<Coordinates[]>([]);
     const color = window.sessionStorage.getItem('color') as Color;
+
     let baseColor = Color.white;
 
     useEffect(() => {
@@ -20,9 +22,17 @@ export function Game(props: GameState) {
         setPotentialMoves(getPotentialMoves(gameState));
     }, [gameState.activeCoordinates]);
 
+    const socket = React.useRef(io(`http://localhost:8000/namespace/${gameState.gameId}`));
+    useEffect(() => {
+        socket.current.on('updateGame', (gameState: GameState) => {
+            setGameState(gameState);
+        });
+    }, []);
+
     return (
         <div>
             <Turn turn={gameState.turn} />
+            <YouAre color={color}/>
             <div style={boardStyles}>
                 {gameState.boardState.map((r, i) => {
                     baseColor = baseColor === Color.white ? Color.black : Color.white;
@@ -30,7 +40,6 @@ export function Game(props: GameState) {
                     return <div style={rowStyles}> {r.map((c, j) => {
                         baseColor = baseColor === Color.white ? Color.black : Color.white;
                         return (
-                            //<div style={{ display: 'table-cell', padding: '0px !important' }}>
                             <CellComponentMemo
                                 key={i.toString().concat(j.toString())}
                                 cell={c}
@@ -40,8 +49,8 @@ export function Game(props: GameState) {
                                 gameState={gameState}
                                 setGameState={setGameState}
                                 baseColor={baseColor}
+                                socket={socket}
                             />
-                            // </div>
                         );
                     })} </div>;
                 })}
@@ -57,10 +66,11 @@ interface CellComponentProps {
     gameState: GameState;
     setGameState: React.Dispatch<React.SetStateAction<GameState>>;
     baseColor: Color;
+    socket: React.MutableRefObject<SocketIOClient.Socket>;
 }
 
 const CellComponentMemo = React.memo(function CellComponent(props: CellComponentProps) {
-    const { cell, coordinates, potentialMoves, setGameState, gameState, baseColor } = props;
+    const { cell, coordinates, potentialMoves, setGameState, gameState, baseColor, color, socket } = props;
 
     const { activeCoordinates } = gameState;
     const isActiveCell = isEqual(activeCoordinates, coordinates);
@@ -75,7 +85,7 @@ const CellComponentMemo = React.memo(function CellComponent(props: CellComponent
             newGameState.activeCoordinates = undefined;
         }
 
-        if (!cell.empty && cell.color !== gameState.turn) {
+        if (!cell.empty && cell.color !== color) {
             newGameState.activeCoordinates = undefined;
         }
 
@@ -85,6 +95,12 @@ const CellComponentMemo = React.memo(function CellComponent(props: CellComponent
 
         // move piece
         if (activeCoordinates && isPotentialMove) {
+            if (color !== gameState.turn) {
+                newGameState.activeCoordinates = undefined;
+                setGameState(newGameState);
+                return;
+            }
+
             newGameState.boardState[coordinates.row][coordinates.column] =
                 newGameState.boardState[activeCoordinates.row][activeCoordinates.column];
             newGameState.boardState[activeCoordinates.row][activeCoordinates.column] = { empty: true };
@@ -96,6 +112,7 @@ const CellComponentMemo = React.memo(function CellComponent(props: CellComponent
             }
 
             newGameState.activeCoordinates = undefined;
+            socket.current.emit('onUpdateGame', newGameState)
         }
 
         setGameState(newGameState);
@@ -161,3 +178,13 @@ function Turn(props: { turn: Color }) {
         </div>
     )
 }
+
+function YouAre(props: { color: Color }) {
+    return (
+        <div style={{ fontSize: '16px', position: 'absolute', top: 20, right: 200, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+            You are <img src={`../chess_icons/${Piece.Pawn}_${props.color}.svg`} alt='turn' style={{ paddingLeft: 25, paddingBottom: 5 }} />
+        </div>
+    )
+}
+
+
