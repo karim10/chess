@@ -9,3 +9,13 @@ body {
 code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
+
+@keyframes slides {
+    from {
+        margin-top: 0px;
+    }
+
+    to {
+        margin-top: 50px;
+    }
+}

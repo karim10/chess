@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { GameState, initialGameState } from './types';
+import { GameState } from './types';
 import { Game } from './components/Game';
 import { BrowserRouter, Route, Switch, useParams } from 'react-router-dom';
 import { Home } from './components/Home';
@@ -19,7 +19,6 @@ function App() {
                     </Route>
                 </Switch>
             </BrowserRouter>
-            {/* <Game {...initialGameState} /> */}
         </div>
     );
 }
