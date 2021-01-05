@@ -13,9 +13,20 @@ export function Home() {
     }, [history]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '450px', justifyContent: 'space-between' }}>
-                <img src={'../chess_icons/chess_home.svg'} alt='home' style={imgStyles} />
-            <button onClick={createGame} style={createButtonStyles}> Create Game </button>
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                height: '450px',
+                justifyContent: 'space-between',
+            }}
+        >
+            <img src={'../chess_icons/chess_home.svg'} alt="home" style={imgStyles} />
+            <button onClick={createGame} style={createButtonStyles}>
+                {' '}
+                Create Game{' '}
+            </button>
         </div>
     );
 }
@@ -30,7 +41,7 @@ const createButtonStyles: CSSProperties = {
     border: '1px solid black',
     borderRadius: '3px',
     cursor: 'pointer',
-}
+};
 
 const imgStyles: CSSProperties = {
     height: '300px',
@@ -38,4 +49,4 @@ const imgStyles: CSSProperties = {
     animation: 'bubble 1.0s forwards',
     animationName: 'slides',
     animationDuration: '2s',
-}
+};

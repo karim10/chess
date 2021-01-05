@@ -1,6 +1,6 @@
 import { Coordinates, Piece, Color, GameState } from './types';
 
-export function getPotentialMoves(gameState: GameState): Coordinates[] {
+export function getPotentialMoves(gameState: GameState, color: Color): Coordinates[] {
     if (!gameState.activeCoordinates) {
         return [];
     }
@@ -12,7 +12,7 @@ export function getPotentialMoves(gameState: GameState): Coordinates[] {
         return [];
     }
 
-    const potentialMovesByAxis = getAxis(row, column, gameState);
+    const potentialMovesByAxis = getAllAxes(row, column, gameState, color);
 
     if (cell.piece === Piece.Queen) {
         return potentialMovesByAxis.diagonal.concat(potentialMovesByAxis.orthogonal);
@@ -30,7 +30,8 @@ export function getPotentialMoves(gameState: GameState): Coordinates[] {
         return potentialMovesByAxis.diagonal_1.concat(potentialMovesByAxis.orthogonal_1);
     }
 
-    const potentialMoves = new Axis(gameState);
+    const potentialMoves = new Axis(gameState, color);
+
     if (cell.piece === Piece.Pawn) {
         const firstPawnMove = row === 1 || row === 6 ? true : false;
         if (cell.color === Color.black) {
@@ -41,9 +42,11 @@ export function getPotentialMoves(gameState: GameState): Coordinates[] {
 
             // black pawn attacking diagonal
             const blackPawnDigonalLeft =
-                potentialMovesByAxis.diagonal_1[2] && gameState.boardState[potentialMovesByAxis.diagonal_1[2].row][potentialMovesByAxis.diagonal_1[2].column];
+                potentialMovesByAxis.diagonal_1[2] &&
+                gameState.boardState[potentialMovesByAxis.diagonal_1[2].row][potentialMovesByAxis.diagonal_1[2].column];
             const blackPawnDigonalRight =
-                potentialMovesByAxis.diagonal_1[3] && gameState.boardState[potentialMovesByAxis.diagonal_1[3].row][potentialMovesByAxis.diagonal_1[3].column];
+                potentialMovesByAxis.diagonal_1[3] &&
+                gameState.boardState[potentialMovesByAxis.diagonal_1[3].row][potentialMovesByAxis.diagonal_1[3].column];
             if (blackPawnDigonalLeft && !blackPawnDigonalLeft.empty && blackPawnDigonalLeft.color === Color.white) {
                 potentialMoves.push_cell(potentialMovesByAxis.diagonal_1[2]);
             }
@@ -61,9 +64,11 @@ export function getPotentialMoves(gameState: GameState): Coordinates[] {
 
             // white pawn attacking diagonal
             const whitePawnDigonalLeft =
-                potentialMovesByAxis.diagonal_1[0] && gameState.boardState[potentialMovesByAxis.diagonal_1[0].row][potentialMovesByAxis.diagonal_1[0].column];
+                potentialMovesByAxis.diagonal_1[0] &&
+                gameState.boardState[potentialMovesByAxis.diagonal_1[0].row][potentialMovesByAxis.diagonal_1[0].column];
             const whitePawnDigonalRight =
-                potentialMovesByAxis.diagonal_1[1] && gameState.boardState[potentialMovesByAxis.diagonal_1[1].row][potentialMovesByAxis.diagonal_1[1].column];
+                potentialMovesByAxis.diagonal_1[1] &&
+                gameState.boardState[potentialMovesByAxis.diagonal_1[1].row][potentialMovesByAxis.diagonal_1[1].column];
             if (whitePawnDigonalLeft && !whitePawnDigonalLeft.empty) {
                 potentialMoves.push_cell(potentialMovesByAxis.diagonal_1[0]);
             }
@@ -86,45 +91,38 @@ export function getPotentialMoves(gameState: GameState): Coordinates[] {
         potentialMoves.push_cell({ row: row + 1, column: column + 2 });
     }
 
-    const color = window.sessionStorage.getItem('color') as Color;
-    return potentialMoves.filter(pm => {
-        const cell = gameState.boardState[pm.row][pm.column];
-        if (cell.empty || (!cell.empty && cell.color !== color)) {
-            return true;
-        }
-
-        return false;
-    });
+    return potentialMoves;
 }
 
-function getAxis(
+function getAllAxes(
     row: number,
     colunm: number,
-    gameState: GameState
+    gameState: GameState,
+    color: Color
 ): {
     diagonal: Coordinates[];
     orthogonal: Coordinates[];
     diagonal_1: Coordinates[];
     orthogonal_1: Coordinates[];
 } {
-    const up_left = new Axis(gameState);
-    const up_right = new Axis(gameState);
-    const bottom_right = new Axis(gameState);
-    const bottom_left = new Axis(gameState);
-    const left = new Axis(gameState);
-    const up = new Axis(gameState);
-    const right = new Axis(gameState);
-    const bottom = new Axis(gameState);
+    const up_left = new Axis(gameState, color);
+    const up_right = new Axis(gameState, color);
+    const bottom_right = new Axis(gameState, color);
+    const bottom_left = new Axis(gameState, color);
+    const left = new Axis(gameState, color);
+    const up = new Axis(gameState, color);
+    const right = new Axis(gameState, color);
+    const bottom = new Axis(gameState, color);
 
     for (let i = 1; i < 8; i++) {
-        up_left.push_cell_to_axis(row - i, colunm - i);
-        up_right.push_cell_to_axis(row - i, colunm + i);
-        bottom_right.push_cell_to_axis(row + i, colunm + i);
-        bottom_left.push_cell_to_axis(row + i, colunm - i);
-        left.push_cell_to_axis(row, colunm - i);
-        up.push_cell_to_axis(row - i, colunm);
-        right.push_cell_to_axis(row, colunm + i);
-        bottom.push_cell_to_axis(row + i, colunm);
+        up_left.push_cell({ row: row - i, column: colunm - i });
+        up_right.push_cell({ row: row - i, column: colunm + i });
+        bottom_right.push_cell({ row: row + i, column: colunm + i });
+        bottom_left.push_cell({ row: row + i, column: colunm - i });
+        left.push_cell({ row: row, column: colunm - i });
+        up.push_cell({ row: row - i, column: colunm });
+        right.push_cell({ row: row, column: colunm + i });
+        bottom.push_cell({ row: row + i, column: colunm });
     }
 
     return {
@@ -138,29 +136,13 @@ function getAxis(
 class Axis extends Array<Coordinates> {
     private gameState: GameState;
     private blocked: boolean;
+    private color: Color;
 
-    constructor(gameState: GameState) {
+    constructor(gameState: GameState, color: Color) {
         super();
         this.gameState = gameState;
         this.blocked = false;
-    }
-
-    public push_cell_to_axis(row: number, column: number) {
-        if (row < 0 || row > 7 || column < 0 || column > 7) {
-            return;
-        }
-
-        if (this.blocked) {
-            return;
-        }
-
-        const cell = this.gameState.boardState[row][column];
-        if (!cell.empty) {
-            this.blocked = true;
-            this.push({ row, column });
-        }
-
-        this.push({ row, column });
+        this.color = color;
     }
 
     public push_cell(coordinates: Coordinates) {
@@ -168,6 +150,20 @@ class Axis extends Array<Coordinates> {
             return;
         }
 
-        this.push(coordinates)
+        if (this.blocked) {
+            return;
+        }
+
+        const cell = this.gameState.boardState[coordinates.row][coordinates.column];
+        if (!cell.empty) {
+            this.blocked = true;
+            if (cell.color !== this.color) {
+                this.push(coordinates);
+            }
+
+            return;
+        }
+
+        this.push(coordinates);
     }
 }

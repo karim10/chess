@@ -19,7 +19,7 @@ app.post('/create-room', function (req: express.Request, res: express.Response) 
         boardState: initialBoardState,
         isFirstRound: true,
         turn: Color.white,
-        eatenPieces: []
+        eatenPieces: [],
     });
 
     addSocketNamespace(gameId);
