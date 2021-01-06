@@ -7,10 +7,9 @@ import { Turn } from './Turn';
 import { YouAre } from './YouAre';
 import { CellComponent } from './Cell';
 
-export function Game(props: GameState) {
-    const [gameState, setGameState] = React.useState<GameState>(props);
+export function Game(props: { gameState: GameState; color: Color }) {
+    const [gameState, setGameState] = React.useState<GameState>(props.gameState);
     const [potentialMoves, setPotentialMoves] = useState<Coordinates[]>([]);
-    const color = window.sessionStorage.getItem('color') as Color;
 
     let baseColor = Color.white;
 
@@ -20,8 +19,8 @@ export function Game(props: GameState) {
             return;
         }
 
-        setPotentialMoves(getPotentialMoves(gameState, color));
-    }, [gameState, color]);
+        setPotentialMoves(getPotentialMoves(gameState, props.color));
+    }, [gameState, props.color]);
 
     const socket = React.useRef(io(`http://localhost:8000/namespace/${gameState.gameId}`));
     useEffect(() => {
@@ -33,11 +32,10 @@ export function Game(props: GameState) {
     return (
         <div>
             <Turn turn={gameState.turn} />
-            <YouAre color={color} />
-            <div style={boardStyles}>
+            <YouAre color={props.color} />
+            <div style={getBoardStyles(props.color)}>
                 {gameState.boardState.map((r, i) => {
                     baseColor = baseColor === Color.white ? Color.black : Color.white;
-
                     return (
                         <div style={rowStyles}>
                             {r.map((c, j) => {
@@ -48,7 +46,7 @@ export function Game(props: GameState) {
                                         cell={c}
                                         coordinates={{ row: i, column: j }}
                                         potentialMoves={potentialMoves}
-                                        color={color}
+                                        color={props.color}
                                         gameState={gameState}
                                         setGameState={setGameState}
                                         baseColor={baseColor}
@@ -64,12 +62,13 @@ export function Game(props: GameState) {
     );
 }
 
-const boardStyles: React.CSSProperties = {
+const getBoardStyles = (color: Color): React.CSSProperties => ({
     display: 'table',
     tableLayout: 'fixed',
     borderSpacing: '3px',
     borderCollapse: 'separate',
-};
+    transform: color === Color.black ? 'rotate(180deg)' : 'none',
+});
 
 const rowStyles: React.CSSProperties = {
     display: 'table-row',

@@ -1,4 +1,4 @@
-import { Coordinates, Piece, Color, GameState } from './types';
+import { Coordinates, Piece, Color, GameState, PawnPosition } from './types';
 
 export function getPotentialMoves(gameState: GameState, color: Color): Coordinates[] {
     if (!gameState.activeCoordinates) {
@@ -34,48 +34,25 @@ export function getPotentialMoves(gameState: GameState, color: Color): Coordinat
 
     if (cell.piece === Piece.Pawn) {
         const firstPawnMove = row === 1 || row === 6 ? true : false;
+
         if (cell.color === Color.black) {
-            potentialMoves.push_cell({ row: row + 1, column: column });
-            if (firstPawnMove) {
-                potentialMoves.push_cell({ row: row + 2, column: column });
+            potentialMoves.push_cell({ row: row + 1, column: column }, PawnPosition.advancing);
+            if (firstPawnMove && potentialMoves.length !== 0) {
+                potentialMoves.push_cell({ row: row + 2, column: column }, PawnPosition.advancing);
             }
 
-            // black pawn attacking diagonal
-            const blackPawnDigonalLeft =
-                potentialMovesByAxis.diagonal_1[2] &&
-                gameState.boardState[potentialMovesByAxis.diagonal_1[2].row][potentialMovesByAxis.diagonal_1[2].column];
-            const blackPawnDigonalRight =
-                potentialMovesByAxis.diagonal_1[3] &&
-                gameState.boardState[potentialMovesByAxis.diagonal_1[3].row][potentialMovesByAxis.diagonal_1[3].column];
-            if (blackPawnDigonalLeft && !blackPawnDigonalLeft.empty && blackPawnDigonalLeft.color === Color.white) {
-                potentialMoves.push_cell(potentialMovesByAxis.diagonal_1[2]);
-            }
-
-            if (blackPawnDigonalRight && !blackPawnDigonalRight.empty) {
-                potentialMoves.push_cell(potentialMovesByAxis.diagonal_1[3]);
-            }
+            potentialMoves.push_cell({ row: row + 1, column: column + 1 }, PawnPosition.attacking);
+            potentialMoves.push_cell({ row: row + 1, column: column - 1 }, PawnPosition.attacking);
         }
 
         if (cell.color === Color.white) {
-            potentialMoves.push({ row: row - 1, column: column });
-            if (firstPawnMove) {
-                potentialMoves.push_cell({ row: row - 2, column: column });
+            potentialMoves.push_cell({ row: row - 1, column: column }, PawnPosition.advancing);
+            if (firstPawnMove && potentialMoves.length !== 0) {
+                potentialMoves.push_cell({ row: row - 2, column: column }, PawnPosition.advancing);
             }
 
-            // white pawn attacking diagonal
-            const whitePawnDigonalLeft =
-                potentialMovesByAxis.diagonal_1[0] &&
-                gameState.boardState[potentialMovesByAxis.diagonal_1[0].row][potentialMovesByAxis.diagonal_1[0].column];
-            const whitePawnDigonalRight =
-                potentialMovesByAxis.diagonal_1[1] &&
-                gameState.boardState[potentialMovesByAxis.diagonal_1[1].row][potentialMovesByAxis.diagonal_1[1].column];
-            if (whitePawnDigonalLeft && !whitePawnDigonalLeft.empty) {
-                potentialMoves.push_cell(potentialMovesByAxis.diagonal_1[0]);
-            }
-
-            if (whitePawnDigonalRight && !whitePawnDigonalRight.empty) {
-                potentialMoves.push_cell(potentialMovesByAxis.diagonal_1[1]);
-            }
+            potentialMoves.push_cell({ row: row - 1, column: column + 1 }, PawnPosition.attacking);
+            potentialMoves.push_cell({ row: row - 1, column: column - 1 }, PawnPosition.attacking);
         }
     }
 
@@ -115,14 +92,14 @@ function getAllAxes(
     const bottom = new Axis(gameState, color);
 
     for (let i = 1; i < 8; i++) {
-        up_left.push_cell({ row: row - i, column: colunm - i });
-        up_right.push_cell({ row: row - i, column: colunm + i });
-        bottom_right.push_cell({ row: row + i, column: colunm + i });
-        bottom_left.push_cell({ row: row + i, column: colunm - i });
-        left.push_cell({ row: row, column: colunm - i });
-        up.push_cell({ row: row - i, column: colunm });
-        right.push_cell({ row: row, column: colunm + i });
-        bottom.push_cell({ row: row + i, column: colunm });
+        up_left.push_cell_to_axis({ row: row - i, column: colunm - i });
+        up_right.push_cell_to_axis({ row: row - i, column: colunm + i });
+        bottom_right.push_cell_to_axis({ row: row + i, column: colunm + i });
+        bottom_left.push_cell_to_axis({ row: row + i, column: colunm - i });
+        left.push_cell_to_axis({ row: row, column: colunm - i });
+        up.push_cell_to_axis({ row: row - i, column: colunm });
+        right.push_cell_to_axis({ row: row, column: colunm + i });
+        bottom.push_cell_to_axis({ row: row + i, column: colunm });
     }
 
     return {
@@ -145,25 +122,47 @@ class Axis extends Array<Coordinates> {
         this.color = color;
     }
 
-    public push_cell(coordinates: Coordinates) {
-        if (coordinates.row < 0 || coordinates.row > 7 || coordinates.column < 0 || coordinates.column > 7) {
-            return;
-        }
-
-        if (this.blocked) {
+    public push_cell_to_axis(coordinates: Coordinates) {
+        if (this.notInBoard(coordinates) || this.blocked) {
             return;
         }
 
         const cell = this.gameState.boardState[coordinates.row][coordinates.column];
-        if (!cell.empty) {
-            this.blocked = true;
-            if (cell.color !== this.color) {
-                this.push(coordinates);
-            }
 
+        if (cell && !cell.empty) {
+            this.blocked = true;
+        }
+
+        this.push_cell(coordinates);
+    }
+
+    public push_cell(coordinates: Coordinates, pawnPosition?: PawnPosition) {
+        if (this.notInBoard(coordinates)) {
+            return;
+        }
+
+        const cell = this.gameState.boardState[coordinates.row][coordinates.column];
+        if (!cell.empty && cell.color === this.color) {
+            return;
+        }
+
+        if (!cell.empty && pawnPosition === PawnPosition.advancing) {
+            return;
+        }
+
+        if (cell.empty && pawnPosition === PawnPosition.attacking) {
             return;
         }
 
         this.push(coordinates);
+    }
+
+    private notInBoard(coordinates: Coordinates) {
+        return (
+            coordinates.row < 0 ||
+            coordinates.row > 7 ||
+            coordinates.column < 0 ||
+            coordinates.column > 7
+        );
     }
 }

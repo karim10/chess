@@ -1,5 +1,6 @@
 import { isEqual } from 'lodash';
 import React, { CSSProperties } from 'react';
+import { sound } from '../Sound';
 import { Cell, Coordinates, Color, GameState } from '../types';
 
 export interface CellComponentProps {
@@ -14,18 +15,28 @@ export interface CellComponentProps {
 }
 
 export const CellComponent = React.memo(function (props: CellComponentProps) {
-    const { cell, coordinates, potentialMoves, setGameState, gameState, baseColor, color, socket } = props;
+    const {
+        cell,
+        coordinates,
+        potentialMoves,
+        setGameState,
+        gameState,
+        baseColor,
+        color,
+        socket,
+    } = props;
 
     const { activeCoordinates } = gameState;
     const isActiveCell = isEqual(activeCoordinates, coordinates);
-    const isPotentialMove = potentialMoves.find(potentialMove => isEqual(potentialMove, coordinates)) !== undefined;
+    const isPotentialMove =
+        potentialMoves.find(potentialMove => isEqual(potentialMove, coordinates)) !== undefined;
 
     const onCellClickHandler = () => {
         const newGameState = { ...gameState };
 
         newGameState.activeCoordinates = coordinates;
 
-        if (cell.empty || isActiveCell || (!cell.color && cell.color !== color)) {
+        if (cell.empty || isActiveCell || cell.color !== color) {
             newGameState.activeCoordinates = undefined;
         }
 
@@ -39,16 +50,22 @@ export const CellComponent = React.memo(function (props: CellComponentProps) {
 
             newGameState.boardState[coordinates.row][coordinates.column] =
                 newGameState.boardState[activeCoordinates.row][activeCoordinates.column];
-            newGameState.boardState[activeCoordinates.row][activeCoordinates.column] = { empty: true };
+            newGameState.boardState[activeCoordinates.row][activeCoordinates.column] = {
+                empty: true,
+            };
 
             newGameState.turn = gameState.turn === Color.black ? Color.white : Color.black;
 
             if (!cell.empty) {
-                newGameState.eatenPieces.push(newGameState.boardState[coordinates.row][coordinates.column]);
+                newGameState.eatenPieces.push(
+                    newGameState.boardState[coordinates.row][coordinates.column]
+                );
             }
 
             newGameState.activeCoordinates = undefined;
             socket.current.emit('onUpdateGame', newGameState);
+            console.log('play sound!');
+            sound.play();
         }
 
         setGameState(newGameState);
@@ -62,7 +79,11 @@ export const CellComponent = React.memo(function (props: CellComponentProps) {
                     <img
                         src={`../chess_icons/${cell.piece}_${cell.color}.svg`}
                         alt={`${cell.piece}_${cell.color}`}
-                        style={{ zIndex: 1, position: 'absolute' }}
+                        style={{
+                            zIndex: 1,
+                            position: 'absolute',
+                            transform: color === Color.black ? 'rotate(180deg)' : 'none',
+                        }}
                     />
                 ) : null}
             </div>

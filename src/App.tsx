@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { GameState } from './types';
+import { Color, GameState } from './types';
 import { Game } from './components/Game';
 import { BrowserRouter, Route, Switch, useParams } from 'react-router-dom';
 import { Home } from './components/Home';
@@ -26,22 +26,26 @@ function App() {
 function GameWrapper() {
     const { gameId } = useParams<{ gameId: string }>();
     const [gameState, setGameState] = React.useState<GameState | undefined>();
+    const [color, setColor] = React.useState<Color>(Color.white);
 
     React.useEffect(() => {
         const fetchGameState = async () => {
             const response = await fetch(`http://localhost:8000/get-game-state/${gameId}`);
             const body = await response.json();
-            const color = window.sessionStorage.getItem('color');
+            const storedColor = window.sessionStorage.getItem('color');
 
-            if (!color) {
+            if (!storedColor) {
                 window.sessionStorage.setItem('color', 'black');
+                setColor(Color.black);
             }
             setGameState(body);
         };
         fetchGameState();
     }, [gameId]);
 
-    return <div>{gameState ? <Game {...gameState} /> : <LoadingSpinner />}</div>;
+    return (
+        <div>{gameState ? <Game gameState={gameState} color={color} /> : <LoadingSpinner />}</div>
+    );
 }
 
 function LoadingSpinner() {

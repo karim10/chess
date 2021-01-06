@@ -21,6 +21,11 @@ export enum Piece {
     Pawn = 'pawn',
 }
 
+export enum PawnPosition {
+    attacking,
+    advancing,
+}
+
 const emptyRow: Row = [
     { empty: true },
     { empty: true },
@@ -98,10 +103,10 @@ export interface Coordinates {
 
 export type Cell =
     | {
-          piece: Piece;
-          color: Color;
-          empty: false;
-      }
+        piece: Piece;
+        color: Color;
+        empty: false;
+    }
     | {
-          empty: true;
-      };
+        empty: true;
+    };
