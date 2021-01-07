@@ -64,7 +64,6 @@ export const CellComponent = React.memo(function (props: CellComponentProps) {
 
             newGameState.activeCoordinates = undefined;
             socket.current.emit('onUpdateGame', newGameState);
-            console.log('play sound!');
             sound.play();
         }
 

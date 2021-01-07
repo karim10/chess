@@ -37,7 +37,7 @@ export function Game(props: { gameState: GameState; color: Color }) {
                 {gameState.boardState.map((r, i) => {
                     baseColor = baseColor === Color.white ? Color.black : Color.white;
                     return (
-                        <div style={rowStyles}>
+                        <div style={rowStyles} key={i}>
                             {r.map((c, j) => {
                                 baseColor = baseColor === Color.white ? Color.black : Color.white;
                                 return (

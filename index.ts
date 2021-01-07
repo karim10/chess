@@ -1,11 +1,23 @@
 import express from 'express';
 import Http from 'http';
 import path from 'path';
-import { Color, GameState, initialBoardState } from '../src/types';
+import { Color, GameState, initialBoardState } from './client/src/types';
 
 const app = express();
 const http = Http.createServer(app);
-const io = require('socket.io')(http);
+
+const io = require("socket.io")(http, {
+    cors: {
+        origin: "http://localhost:3000",
+        methods: ["GET", "POST"],
+    }
+});
+
+app.use(function (_req, res, next) {
+    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 
 app.use(express.static(path.join(__dirname, '../build')));
 
@@ -41,8 +53,11 @@ app.get('/*', (req: express.Request, res: express.Response) => {
     res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });
 
-http.listen(8000);
+http.listen(8000, () => {
+    console.log('listening on port 8000');
+});
 
+//helpers
 function addSocketNamespace(gameId: string) {
     const nsp = io.of(`/namespace/${gameId}`);
     nsp.on('connection', function (socket: any) {

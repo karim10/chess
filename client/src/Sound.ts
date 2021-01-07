@@ -19,4 +19,4 @@ class Sound {
 }
 
 
-export const sound = new Sound('./move.mp3');
+export const sound = new Sound('../move.mp3');

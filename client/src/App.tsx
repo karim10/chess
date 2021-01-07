@@ -6,7 +6,6 @@ import { BrowserRouter, Route, Switch, useParams } from 'react-router-dom';
 import { Home } from './components/Home';
 
 function App() {
-    window.sessionStorage.setItem('color', '');
     return (
         <div style={appStyles}>
             <BrowserRouter>
