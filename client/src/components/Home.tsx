@@ -4,7 +4,11 @@ import { useHistory } from 'react-router-dom';
 export function Home() {
     const history = useHistory();
     const createGame = React.useCallback(async () => {
-        const response = await fetch('http://localhost:8000/create-room', {
+        console.log('node env: ', process.env.NODE_ENV);
+        console.log('url: ', process.env.PUBLIC_URL);
+        // console.log('process env: ', process.env.PORT);
+
+        const response = await fetch(`/create-room`, {
             method: 'POST',
         });
         const body = await response.json();

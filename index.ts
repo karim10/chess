@@ -19,7 +19,7 @@ app.use(function (_req, res, next) {
     next();
 });
 
-app.use(express.static(path.join(__dirname, '../build')));
+app.use(express.static(path.join(__dirname, './client/build')));
 
 let games: GameState[] = [];
 const socketNamespaces: { gameId: string; nsp: SocketIO.Namespace }[] = [];
@@ -49,12 +49,14 @@ app.get('/get-game-state/:gameId', function (req: express.Request, res: express.
     res.json(game);
 });
 
-app.get('/*', (req: express.Request, res: express.Response) => {
-    res.sendFile(path.join(__dirname, '../build', 'index.html'));
+app.get('*', (req: express.Request, res: express.Response) => {
+    res.sendFile(path.join(__dirname, './client/build', 'index.html'));
 });
 
-http.listen(8000, () => {
-    console.log('listening on port 8000');
+const port = process.env.PORT || 8000;
+
+http.listen(port, () => {
+    console.log(`listening on port ${port}`);
 });
 
 //helpers
