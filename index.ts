@@ -6,6 +6,7 @@ import { Color, GameState, initialBoardState } from './client/src/types';
 const app = express();
 const http = Http.createServer(app);
 
+// cors
 const io = require("socket.io")(http, {
     cors: {
         origin: "http://localhost:3000",

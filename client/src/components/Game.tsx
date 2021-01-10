@@ -22,7 +22,7 @@ export function Game(props: { gameState: GameState; color: Color }) {
         setPotentialMoves(getPotentialMoves(gameState, props.color));
     }, [gameState, props.color]);
 
-    const socket = React.useRef(io(`http://localhost:8000/namespace/${gameState.gameId}`));
+    const socket = React.useRef(io(`/namespace/${gameState.gameId}`));
     useEffect(() => {
         socket.current.on('updateGame', (gameState: GameState) => {
             setGameState(gameState);

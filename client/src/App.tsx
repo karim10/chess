@@ -29,7 +29,7 @@ function GameWrapper() {
 
     React.useEffect(() => {
         const fetchGameState = async () => {
-            const response = await fetch(`http://localhost:8000/get-game-state/${gameId}`);
+            const response = await fetch(`/get-game-state/${gameId}`);
             const body = await response.json();
             const storedColor = window.sessionStorage.getItem('color');
 
