@@ -48,5 +48,6 @@
         "@types/react-router-dom": "^5.1.6",
         "@types/socket.io": "^2.1.12",
         "@types/socket.io-client": "^1.4.34"
-    }
+    },
+    "proxy": "http://localhost:8000"
 }

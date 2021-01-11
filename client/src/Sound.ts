@@ -1,11 +1,11 @@
 class Sound {
     private soundElement: HTMLAudioElement;
     constructor(src: string) {
-        this.soundElement = document.createElement("audio");
+        this.soundElement = document.createElement('audio');
         this.soundElement.src = src;
-        this.soundElement.setAttribute("preload", "auto");
-        this.soundElement.setAttribute("controls", "none");
-        this.soundElement.style.display = "none";
+        this.soundElement.setAttribute('preload', 'auto');
+        this.soundElement.setAttribute('controls', 'none');
+        this.soundElement.style.display = 'none';
         document.body.appendChild(this.soundElement);
     }
 
@@ -17,6 +17,5 @@ class Sound {
         this.soundElement.pause();
     }
 }
-
 
 export const sound = new Sound('../move.mp3');

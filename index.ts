@@ -7,16 +7,16 @@ const app = express();
 const http = Http.createServer(app);
 
 // cors
-const io = require("socket.io")(http, {
+const io = require('socket.io')(http, {
     cors: {
-        origin: "http://localhost:3000",
-        methods: ["GET", "POST"],
-    }
+        origin: 'http://localhost:3000',
+        methods: ['GET', 'POST'],
+    },
 });
 
 app.use(function (_req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     next();
 });
 

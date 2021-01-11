@@ -48,7 +48,7 @@ function GameWrapper() {
 }
 
 function LoadingSpinner() {
-    return <div>Loading ...</div>;
+    return <div className="loader"></div>;
 }
 
 const appStyles = {

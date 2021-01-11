@@ -103,10 +103,10 @@ export interface Coordinates {
 
 export type Cell =
     | {
-        piece: Piece;
-        color: Color;
-        empty: false;
-    }
+          piece: Piece;
+          color: Color;
+          empty: false;
+      }
     | {
-        empty: true;
-    };
+          empty: true;
+      };
