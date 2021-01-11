@@ -1,7 +1,8 @@
 import { isEqual } from 'lodash';
-import React, { CSSProperties } from 'react';
+import React from 'react';
 import { sound } from '../Sound';
 import { Cell, Coordinates, Color, GameState } from '../types';
+import { CenteredDiv } from './CenteredDiv';
 
 export interface CellComponentProps {
     cell: Cell;
@@ -72,7 +73,7 @@ export const CellComponent = React.memo(function (props: CellComponentProps) {
 
     return (
         <div style={getCellStyles(isActiveCell, baseColor)} onClick={onCellClickHandler}>
-            <div style={centeredDivStyles}>
+            <CenteredDiv>
                 {isPotentialMove ? <div style={getPotentialStyles(cell.empty)} /> : null}
                 {!cell.empty ? (
                     <img
@@ -85,26 +86,18 @@ export const CellComponent = React.memo(function (props: CellComponentProps) {
                         }}
                     />
                 ) : null}
-            </div>
+            </CenteredDiv>
         </div>
     );
 });
 
-const centeredDivStyles: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    height: '100%',
-};
-
 const getCellStyles = (isActiveCell: boolean, baseColor: Color): React.CSSProperties => ({
+    display: 'table-cell',
     height: '70px',
     width: '70px',
     border: 'solid 1px',
     cursor: 'pointer',
     backgroundColor: isActiveCell ? '#EDFF6B' : baseColor === Color.black ? '#65A259' : '#EBF4D2',
-    display: 'table-cell',
 });
 
 const getPotentialStyles = (empty: boolean): React.CSSProperties => ({

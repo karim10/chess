@@ -25,8 +25,8 @@ code {
     animation: spin 1s infinite linear;
     border: solid 2vmin transparent;
     border-radius: 50%;
-    border-right-color: #58990C;
-    border-top-color: #58990C;
+    border-right-color: #58990c;
+    border-top-color: #58990c;
     box-sizing: border-box;
     height: 20vmin;
     left: calc(50% - 10vmin);

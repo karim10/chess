@@ -42,9 +42,7 @@ function GameWrapper() {
         fetchGameState();
     }, [gameId]);
 
-    return (
-        <div>{gameState ? <Game gameState={gameState} color={color} /> : <LoadingSpinner />}</div>
-    );
+    return gameState ? <Game gameState={gameState} color={color} /> : <LoadingSpinner />;
 }
 
 function LoadingSpinner() {
