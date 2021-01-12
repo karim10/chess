@@ -9,7 +9,7 @@ export function Home() {
         });
         const body = await response.json();
         history.push(`/game/${body.gameId}`);
-        window.sessionStorage.setItem('color', 'white');
+        window.sessionStorage.setItem(body.gameId, 'white');
     }, [history]);
 
     return (

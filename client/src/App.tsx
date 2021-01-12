@@ -31,10 +31,10 @@ function GameWrapper() {
         const fetchGameState = async () => {
             const response = await fetch(`/get-game-state/${gameId}`);
             const body = await response.json();
-            const storedColor = window.sessionStorage.getItem('color');
+            const storedColor = window.sessionStorage.getItem(gameId);
 
             if (!storedColor) {
-                window.sessionStorage.setItem('color', 'black');
+                window.sessionStorage.setItem(gameId, 'black');
                 setColor(Color.black);
             }
             setGameState(body);
