@@ -12,9 +12,9 @@
     "scripts": {
         "start": "npm install && ts-node index.ts",
         "heroku-postbuild": "cd client && npm install && npm install --only=dev --no-shrinkwrap && npm run build",
-        "client": "cd client && npm start",
+        "client": "cd client && yarn start",
         "server": "nodemon index.ts",
-        "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\"",
+        "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
         "prettier": "prettier --write ."
     },
     "eslintConfig": {
