@@ -49,5 +49,5 @@
         "@types/socket.io": "^2.1.12",
         "@types/socket.io-client": "^1.4.34"
     },
-    "proxy": "http://localhost:8000"
+    "proxy": "http://localhost:8000/"
 }

@@ -1,14 +1,15 @@
-import React from 'react';
+import React from 'react'
+import styled from 'styled-components'
 
 export function CenteredDiv(props: React.PropsWithChildren<{}>) {
-    return <div style={centeredDivStyles}>{props.children}</div>;
+    return <CentredDivContainer>{props.children}</CentredDivContainer>
 }
 
-const centeredDivStyles: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    height: '100%',
-};
+const CentredDivContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+`

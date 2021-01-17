@@ -1,18 +1,19 @@
-import { isEqual } from 'lodash';
-import React from 'react';
-import { sound } from '../Sound';
-import { Cell, Coordinates, Color, GameState } from '../types';
-import { CenteredDiv } from './CenteredDiv';
+import { isEqual } from 'lodash'
+import React from 'react'
+import styled from 'styled-components'
+import { sound } from '../Sound'
+import { Cell, Coordinates, Color, GameState, Piece } from '../types'
+import { CenteredDiv } from './CenteredDiv'
 
 export interface CellComponentProps {
-    cell: Cell;
-    coordinates: Coordinates;
-    potentialMoves: Coordinates[];
-    color: Color;
-    gameState: GameState;
-    setGameState: React.Dispatch<React.SetStateAction<GameState>>;
-    baseColor: Color;
-    socket: React.MutableRefObject<SocketIOClient.Socket>;
+    cell: Cell
+    coordinates: Coordinates
+    potentialMoves: Coordinates[]
+    color: Color
+    gameState: GameState
+    setGameState: React.Dispatch<React.SetStateAction<GameState>>
+    baseColor: Color
+    socket: React.MutableRefObject<SocketIOClient.Socket>
 }
 
 export const CellComponent = React.memo(function (props: CellComponentProps) {
@@ -25,86 +26,95 @@ export const CellComponent = React.memo(function (props: CellComponentProps) {
         baseColor,
         color,
         socket,
-    } = props;
+    } = props
 
-    const { activeCoordinates } = gameState;
-    const isActiveCell = isEqual(activeCoordinates, coordinates);
+    const { activeCoordinates } = gameState
+    const isActiveCell = isEqual(activeCoordinates, coordinates)
     const isPotentialMove =
-        potentialMoves.find(potentialMove => isEqual(potentialMove, coordinates)) !== undefined;
+        potentialMoves.find(potentialMove => isEqual(potentialMove, coordinates)) !== undefined
 
     const onCellClickHandler = () => {
-        const newGameState = { ...gameState };
+        // game over
+        if (gameState.winner) {
+            return
+        }
 
-        newGameState.activeCoordinates = coordinates;
+        const newGameState = { ...gameState }
+        newGameState.activeCoordinates = coordinates
 
         if (cell.empty || isActiveCell || cell.color !== color) {
-            newGameState.activeCoordinates = undefined;
+            newGameState.activeCoordinates = undefined
         }
 
         // move piece
         if (activeCoordinates && isPotentialMove) {
             if (color !== gameState.turn) {
-                newGameState.activeCoordinates = undefined;
-                setGameState(newGameState);
-                return;
+                newGameState.activeCoordinates = undefined
+                setGameState(newGameState)
+                return
             }
 
             newGameState.boardState[coordinates.row][coordinates.column] =
-                newGameState.boardState[activeCoordinates.row][activeCoordinates.column];
+                newGameState.boardState[activeCoordinates.row][activeCoordinates.column]
             newGameState.boardState[activeCoordinates.row][activeCoordinates.column] = {
                 empty: true,
-            };
-
-            newGameState.turn = gameState.turn === Color.black ? Color.white : Color.black;
-
-            if (!cell.empty) {
-                newGameState.eatenPieces.push(
-                    newGameState.boardState[coordinates.row][coordinates.column]
-                );
             }
 
-            newGameState.activeCoordinates = undefined;
-            socket.current.emit('onUpdateGame', newGameState);
-            sound.play();
+            newGameState.turn = gameState.turn === Color.black ? Color.white : Color.black
+            newGameState.activeCoordinates = undefined
+
+            if (!cell.empty && cell.piece === Piece.King) {
+                newGameState.winner = color
+            }
+
+            socket.current.emit('onUpdateGame', newGameState)
+            sound.play()
         }
 
-        setGameState(newGameState);
-    };
+        setGameState(newGameState)
+    }
 
     return (
-        <div style={getCellStyles(isActiveCell, baseColor)} onClick={onCellClickHandler}>
+        <CellContainer
+            isActiveCell={isActiveCell}
+            baseColor={baseColor}
+            onClick={onCellClickHandler}
+        >
             <CenteredDiv>
-                {isPotentialMove ? <div style={getPotentialStyles(cell.empty)} /> : null}
+                {isPotentialMove ? <PotentialMove empty={cell.empty} /> : null}
                 {!cell.empty ? (
-                    <img
+                    <PieceImg
                         src={`../chess_icons/${cell.piece}_${cell.color}.svg`}
                         alt={`${cell.piece}_${cell.color}`}
-                        style={{
-                            zIndex: 1,
-                            position: 'absolute',
-                            transform: color === Color.black ? 'rotate(180deg)' : 'none',
-                        }}
+                        color={color}
                     />
                 ) : null}
             </CenteredDiv>
-        </div>
-    );
-});
+        </CellContainer>
+    )
+})
 
-const getCellStyles = (isActiveCell: boolean, baseColor: Color): React.CSSProperties => ({
-    display: 'table-cell',
-    height: '70px',
-    width: '70px',
-    border: 'solid 1px',
-    cursor: 'pointer',
-    backgroundColor: isActiveCell ? '#EDFF6B' : baseColor === Color.black ? '#65A259' : '#EBF4D2',
-});
+const PieceImg = styled.img<{ color: Color }>`
+    z-index: 1;
+    position: absolute;
+    transform: ${props => (props.color === Color.black ? 'rotate(180deg)' : 'none')};
+`
 
-const getPotentialStyles = (empty: boolean): React.CSSProperties => ({
-    height: empty ? '25px' : '50px',
-    width: empty ? '25px' : '50px',
-    backgroundColor: '#bbb',
-    borderRadius: '50%',
-    display: 'inline-block',
-    position: 'absolute',
-});
+const CellContainer = styled.div<{ isActiveCell: boolean; baseColor: Color }>`
+    display: table-cell;
+    height: max(calc((100vh - 140px) / 8), 40px);
+    width: max(calc((100vh - 140px) / 8), 40px);
+    border: solid 1px;
+    cursor: pointer;
+    background-color: ${props =>
+        props.isActiveCell ? '#EDFF6B' : props.baseColor === Color.black ? '#65A259' : '#EBF4D2'};
+`
+
+const PotentialMove = styled.div<{ empty: boolean }>`
+    position: absolute;
+    height: ${props => (props.empty ? '25px' : '50px')};
+    width: ${props => (props.empty ? '25px' : '50px')};
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+`

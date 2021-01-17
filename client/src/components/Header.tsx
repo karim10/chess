@@ -1,54 +1,57 @@
-import { Color, Piece } from '../types';
+import styled from 'styled-components'
+import { Color, Piece } from '../types'
 
 export function Header(props: { turn: Color; color: Color }) {
     return (
-        <div style={{ height: '100px', position: 'relative', width: '100%' }}>
+        <HeaderContainer>
             <Turn turn={props.turn} />
             <YouAre color={props.color} />
-        </div>
-    );
+        </HeaderContainer>
+    )
 }
+
+const HeaderContainer = styled.div`
+    min-height: 50px;
+    width: 100%;
+    padding-top: 5px;
+`
 
 function Turn(props: { turn: Color }) {
     return (
-        <div style={turnStyles}>
-            Turn{' '}
-            <img
-                src={`../chess_icons/${Piece.Pawn}_${props.turn}.svg`}
-                alt="turn"
-                style={{ paddingLeft: 25, paddingBottom: 5 }}
-            />
-        </div>
-    );
+        <TurnWrapper>
+            Turn <PawnImage src={`../chess_icons/${Piece.Pawn}_${props.turn}.svg`} alt="turn" />
+        </TurnWrapper>
+    )
 }
 
-const turnStyles: React.CSSProperties = {
-    position: 'absolute',
-    fontSize: '16px',
-    left: 200,
-    fontWeight: 'bold',
-    display: 'flex',
-    alignItems: 'center',
-};
+const TurnWrapper = styled.div`
+    position: absolute;
+    font-size: 16px;
+    left: 10%;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+`
 
 function YouAre(props: { color: Color }) {
     return (
-        <div style={youAreStyles}>
+        <YouAreWrapper>
             You are{' '}
-            <img
-                src={`../chess_icons/${Piece.Pawn}_${props.color}.svg`}
-                alt="turn"
-                style={{ paddingLeft: 25, paddingBottom: 5 }}
-            />
-        </div>
-    );
+            <PawnImage alt="color" src={`../chess_icons/${Piece.Pawn}_${props.color}.svg`} />
+        </YouAreWrapper>
+    )
 }
 
-const youAreStyles: React.CSSProperties = {
-    position: 'absolute',
-    fontSize: '16px',
-    right: 200,
-    fontWeight: 'bold',
-    display: 'flex',
-    alignItems: 'center',
-};
+const YouAreWrapper = styled.div`
+    position: absolute;
+    font-size: 16px;
+    right: 10%;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+`
+
+const PawnImage = styled.img`
+    padding-left: 25px;
+    padding-bottom: 5px;
+`

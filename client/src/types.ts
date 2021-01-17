@@ -1,10 +1,10 @@
 export interface GameState {
-    readonly gameId: string;
-    readonly turn: Color;
-    readonly boardState: BoardState;
-    readonly activeCoordinates?: Coordinates;
-    readonly isFirstRound: boolean;
-    readonly eatenPieces: Cell[];
+    readonly gameId: string
+    readonly turn: Color
+    readonly boardState: BoardState
+    readonly activeCoordinates?: Coordinates
+    readonly isFirstRound: boolean
+    readonly winner?: Color
 }
 
 export enum Color {
@@ -35,11 +35,11 @@ const emptyRow: Row = [
     { empty: true },
     { empty: true },
     { empty: true },
-];
+]
 
-export type BoardState = [Row, Row, Row, Row, Row, Row, Row, Row];
+export type BoardState = [Row, Row, Row, Row, Row, Row, Row, Row]
 
-type Row = [Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell];
+type Row = [Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell]
 
 export const initialBoardState: BoardState = [
     [
@@ -86,27 +86,26 @@ export const initialBoardState: BoardState = [
         { piece: Piece.Knight, color: Color.white, empty: false },
         { piece: Piece.Rook, color: Color.white, empty: false },
     ],
-];
+]
 
 export const initialGameState: GameState = {
     gameId: '0000',
     boardState: initialBoardState,
     turn: Color.white,
     isFirstRound: true,
-    eatenPieces: [],
-};
+}
 
 export interface Coordinates {
-    row: number;
-    column: number;
+    row: number
+    column: number
 }
 
 export type Cell =
     | {
-          piece: Piece;
-          color: Color;
-          empty: false;
+          piece: Piece
+          color: Color
+          empty: false
       }
     | {
-          empty: true;
-      };
+          empty: true
+      }
