@@ -8,7 +8,7 @@ import { CellComponent } from './Cell'
 import { ShareLink } from './ShareLink'
 import { Header } from './Header'
 
-export function Game(props: { gameState: GameState; color: Color }) {
+export function Game(props: { gameState: GameState; playerColor: Color }) {
     const [gameState, setGameState] = React.useState<GameState>(props.gameState)
     const [potentialMoves, setPotentialMoves] = React.useState<Coordinates[]>([])
 
@@ -21,8 +21,8 @@ export function Game(props: { gameState: GameState; color: Color }) {
             return
         }
 
-        setPotentialMoves(getPotentialMoves(gameState, props.color))
-    }, [gameState, props.color])
+        setPotentialMoves(getPotentialMoves(gameState, props.playerColor))
+    }, [gameState, props.playerColor])
 
     React.useEffect(() => {
         socket.current.on('updateGame', (gameState: GameState) => {
@@ -32,10 +32,10 @@ export function Game(props: { gameState: GameState; color: Color }) {
 
     return (
         <GameWrapper>
-            <Header turn={gameState.turn} color={props.color} />
+            <Header turn={gameState.turn} playerColor={props.playerColor} />
             <BoardWrapper>
                 {gameState.winner ? <Winner winner={gameState.winner} /> : null}
-                <Board color={props.color}>
+                <Board color={props.playerColor}>
                     {gameState.boardState.map((r, i) => {
                         baseColor = baseColor === Color.white ? Color.black : Color.white
                         return (
@@ -49,7 +49,7 @@ export function Game(props: { gameState: GameState; color: Color }) {
                                             cell={c}
                                             coordinates={{ row: i, column: j }}
                                             potentialMoves={potentialMoves}
-                                            color={props.color}
+                                            playerColor={props.playerColor}
                                             gameState={gameState}
                                             setGameState={setGameState}
                                             baseColor={baseColor}
@@ -85,6 +85,7 @@ const WinnerWrapper = styled.div`
     font-size: 50px;
     font-weight: bold;
     z-index: 2;
+    font-family: ${props => props.theme.fontFamily};
 `
 
 const WinnerPawn = styled.img`

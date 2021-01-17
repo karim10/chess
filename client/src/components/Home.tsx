@@ -21,27 +21,28 @@ export function Home() {
     )
 }
 
-const HomeWrapper = styled.div`
+export const HomeWrapper = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 450px;
     justify-content: space-between;
+    height: 450px;
 `
 
 const CreateButton = styled.button`
     width: 200px;
     height: 50px;
-    background-color: #65a259;
+    background-color: ${props => props.theme.color.primary};
     color: white;
     font-size: 18px;
     font-weight: bold;
     border: 1px solid black;
     border-radius: 3px;
     cursor: pointer;
+    font-family: ${props => props.theme.fontFamily};
 `
 
-const HomeImage = styled.img`
+export const HomeImage = styled.img`
     height: 300px;
     width: 300px;
     animation: bubble 1s forwards;

@@ -1,6 +1,7 @@
 import { isEqual } from 'lodash'
 import React from 'react'
 import styled from 'styled-components'
+
 import { sound } from '../Sound'
 import { Cell, Coordinates, Color, GameState, Piece } from '../types'
 import { CenteredDiv } from './CenteredDiv'
@@ -9,7 +10,7 @@ export interface CellComponentProps {
     cell: Cell
     coordinates: Coordinates
     potentialMoves: Coordinates[]
-    color: Color
+    playerColor: Color
     gameState: GameState
     setGameState: React.Dispatch<React.SetStateAction<GameState>>
     baseColor: Color
@@ -24,7 +25,7 @@ export const CellComponent = React.memo(function (props: CellComponentProps) {
         setGameState,
         gameState,
         baseColor,
-        color,
+        playerColor,
         socket,
     } = props
 
@@ -42,13 +43,15 @@ export const CellComponent = React.memo(function (props: CellComponentProps) {
         const newGameState = { ...gameState }
         newGameState.activeCoordinates = coordinates
 
-        if (cell.empty || isActiveCell || cell.color !== color) {
+        if (cell.empty || isActiveCell || cell.color !== playerColor) {
             newGameState.activeCoordinates = undefined
         }
 
         // move piece
         if (activeCoordinates && isPotentialMove) {
-            if (color !== gameState.turn) {
+            console.log('AAAAAAAAAAAA')
+
+            if (playerColor !== gameState.turn) {
                 newGameState.activeCoordinates = undefined
                 setGameState(newGameState)
                 return
@@ -64,7 +67,7 @@ export const CellComponent = React.memo(function (props: CellComponentProps) {
             newGameState.activeCoordinates = undefined
 
             if (!cell.empty && cell.piece === Piece.King) {
-                newGameState.winner = color
+                newGameState.winner = playerColor
             }
 
             socket.current.emit('onUpdateGame', newGameState)
@@ -86,7 +89,7 @@ export const CellComponent = React.memo(function (props: CellComponentProps) {
                     <PieceImg
                         src={`../chess_icons/${cell.piece}_${cell.color}.svg`}
                         alt={`${cell.piece}_${cell.color}`}
-                        color={color}
+                        color={playerColor}
                     />
                 ) : null}
             </CenteredDiv>
@@ -107,14 +110,18 @@ const CellContainer = styled.div<{ isActiveCell: boolean; baseColor: Color }>`
     border: solid 1px;
     cursor: pointer;
     background-color: ${props =>
-        props.isActiveCell ? '#EDFF6B' : props.baseColor === Color.black ? '#65A259' : '#EBF4D2'};
+        props.isActiveCell
+            ? props.theme.color.tertiary
+            : props.baseColor === Color.black
+            ? props.theme.color.primary
+            : props.theme.color.secondary};
 `
 
 const PotentialMove = styled.div<{ empty: boolean }>`
     position: absolute;
     height: ${props => (props.empty ? '25px' : '50px')};
     width: ${props => (props.empty ? '25px' : '50px')};
-    background-color: #bbb;
+    background-color: ${props => props.theme.color.grey};
     border-radius: 50%;
     display: inline-block;
 `
