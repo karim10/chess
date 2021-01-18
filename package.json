@@ -10,7 +10,6 @@
         "typescript": "^4.1.3"
     },
     "scripts": {
-        "prestart": "cd client && npm install && npm install --only=dev --no-shrinkwrap && npm run build",
         "start": "npm install && ts-node index.ts",
         "client": "cd client && yarn start",
         "server": "nodemon index.ts",
