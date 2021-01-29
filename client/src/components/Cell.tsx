@@ -49,8 +49,6 @@ export const CellComponent = React.memo(function (props: CellComponentProps) {
 
         // move piece
         if (activeCoordinates && isPotentialMove) {
-            console.log('AAAAAAAAAAAA')
-
             if (playerColor !== gameState.turn) {
                 newGameState.activeCoordinates = undefined
                 setGameState(newGameState)
@@ -105,8 +103,8 @@ const PieceImg = styled.img<{ color: Color }>`
 
 const CellContainer = styled.div<{ isActiveCell: boolean; baseColor: Color }>`
     display: table-cell;
-    height: max(calc((100vh - 140px) / 8), 40px);
-    width: max(calc((100vh - 140px) / 8), 40px);
+    height: max(calc((100vh - 200px) / 8), 40px);
+    width: max(calc((100vh - 200px) / 8), 40px);
     border: solid 1px;
     cursor: pointer;
     background-color: ${props =>

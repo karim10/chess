@@ -13,8 +13,8 @@ export function Header(props: { turn: Color; playerColor: Color }) {
 
 const HeaderContainer = styled.div`
     min-height: 50px;
-    width: 100%;
     padding-top: 5px;
+    width: 100%;
 `
 
 function Turn(props: { turn: Color }) {
