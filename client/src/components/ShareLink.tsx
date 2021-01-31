@@ -5,7 +5,7 @@ export function ShareLink(props: { gameId: string }) {
         <ShareLinkWrapper>
             <Label>Share this link with your opponent: </Label>
             <br />
-            <Link>{`http://kby-portfolio-chess.eu-central-1.elasticbeanstalk.com/game/${props.gameId}`}</Link>
+            <Link>{`http://chess.karimby-portfolio.com/game/${props.gameId}`}</Link>
         </ShareLinkWrapper>
     )
 }
