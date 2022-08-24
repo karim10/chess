@@ -12,7 +12,6 @@
     "scripts": {
         "prestart": "npm install",
         "start": "ts-node index.ts",
-        "postinstall": "cd client && npm install && npm install --only=dev --no-shrinkwrap && npm run build",
         "client": "cd client && npm start",
         "server": "nodemon index.ts",
         "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
