@@ -55,7 +55,7 @@ app.get('*', (req: express.Request, res: express.Response) => {
 
 const port = process.env.PORT || 8000
 
-http.listen(port, () => {
+app.listen(port, () => {
     console.log(`listening on port ${port}`)
 })
 
