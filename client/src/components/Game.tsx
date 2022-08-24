@@ -62,7 +62,7 @@ export function Game(props: { gameState: GameState; playerColor: Color }) {
                     })}
                 </Board>
             </BoardWrapper>
-            <ShareLink gameId={gameState.gameId} />
+            {/* <ShareLink gameId={gameState.gameId} /> */}
         </GameWrapper>
     )
 }
